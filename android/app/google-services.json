@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "838989928746",
+    "project_id": "yampi-barberia",
+    "storage_bucket": "yampi-barberia.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:838989928746:android:2446e2eb9bab9b54352653",
+        "android_client_info": {
+          "package_name": "com.example.yampi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUgRDmd6cLDqYTsedO6Bs52Hma6PoPQ1E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
