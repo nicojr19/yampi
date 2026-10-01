@@ -4,6 +4,7 @@ import 'firebase_options.dart';
 import 'theme/app_theme.dart';
 import 'views/cliente/seleccionar_servicio_view.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'views/barbero/login_view.dart';
 
 
 Future<void> main() async {
@@ -65,8 +66,15 @@ class HomeView extends StatelessWidget {
                   child: const Text('RESERVAR HORA'),
                 ),
                 const SizedBox(height: 14),
-                OutlinedButton(
-                  onPressed: () {},
+                                OutlinedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LoginView(),
+                      ),
+                    );
+                  },
                   child: const Text('SOY EL BARBERO'),
                 ),
                 const SizedBox(height: 40),
