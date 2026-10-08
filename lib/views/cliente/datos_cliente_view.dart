@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../models/reserva.dart';
 import '../../models/servicio.dart';
+import '../../services/email_service.dart';
 import '../../services/firestore_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/fondo_yampi.dart';
 import 'confirmacion_view.dart';
-import 'package:intl/intl.dart';
-
 
 /// Paso 3 del cliente: sus datos personales y el envío de la reserva.
 ///
@@ -56,6 +57,27 @@ class _DatosClienteViewState extends State<DatosClienteView> {
         fechaHora: widget.fechaHora,
       );
 
+      // Aviso al barbero. Si el correo falla, la reserva ya quedó guardada:
+      // no tiene sentido mostrarle un error al cliente por esto.
+      try {
+        await EmailService.avisarReservaNueva(
+          Reserva(
+            id: '',
+            clienteNombre: _nombreCtrl.text.trim(),
+            clienteEmail: _emailCtrl.text.trim(),
+            clienteTelefono: _telefonoCtrl.text.trim(),
+            servicioId: widget.servicio.id,
+            servicioNombre: widget.servicio.nombre,
+            precio: widget.servicio.precio,
+            fechaHora: widget.fechaHora,
+            estado: EstadoReserva.pendiente,
+            creadaEn: DateTime.now(),
+          ),
+        );
+      } catch (e) {
+        debugPrint('>>> ERROR AL ENVIAR CORREO AL BARBERO: $e');
+      }
+
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
@@ -81,117 +103,123 @@ class _DatosClienteViewState extends State<DatosClienteView> {
 
   @override
   Widget build(BuildContext context) {
-        final pesos = NumberFormat.currency(
+    final fecha = DateFormat("EEEE d 'de' MMMM", 'es').format(widget.fechaHora);
+    final hora = DateFormat('HH:mm').format(widget.fechaHora);
+    final pesos = NumberFormat.currency(
       locale: 'es_CL',
       symbol: '\$',
       decimalDigits: 0,
     );
-    final fecha = DateFormat("EEEE d 'de' MMMM", 'es').format(widget.fechaHora);
-    final hora = DateFormat('HH:mm').format(widget.fechaHora);
 
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(title: const Text('Tus datos')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                _ResumenReserva(
-                  servicio: widget.servicio,
-                  fecha: fecha,
-                  hora: hora,
-                ),
-                const SizedBox(height: 28),
-                const Text(
-                  '¿A nombre de quién?',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: YampiColors.negroSuave,
+      body: FondoYampi(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  _ResumenReserva(
+                    servicio: widget.servicio,
+                    fecha: fecha,
+                    hora: hora,
+                    precioFormateado: pesos.format(widget.servicio.precio),
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Te enviaremos la confirmación a tu correo.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: YampiColors.grisTexto,
+                  const SizedBox(height: 28),
+                  const Text(
+                    '¿A nombre de quién?',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: YampiColors.negroSuave,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 18),
-                TextFormField(
-                  controller: _nombreCtrl,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
-                    labelText: 'Nombre completo',
-                    prefixIcon: Icon(Icons.person_outline),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Te enviaremos la confirmación a tu correo.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: YampiColors.grisTexto,
+                    ),
                   ),
-                  validator: (v) {
-                    if (v == null || v.trim().length < 3) {
-                      return 'Escribe tu nombre completo';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Correo electrónico',
-                    prefixIcon: Icon(Icons.mail_outline),
+                  const SizedBox(height: 18),
+                  TextFormField(
+                    controller: _nombreCtrl,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(
+                      labelText: 'Nombre completo',
+                      prefixIcon: Icon(Icons.person_outline),
+                    ),
+                    validator: (v) {
+                      if (v == null || v.trim().length < 3) {
+                        return 'Escribe tu nombre completo';
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (v) {
-                    final correo = v?.trim() ?? '';
-                    final valido = RegExp(
-                      r'^[\w\.\-]+@[\w\-]+\.[\w\.\-]+$',
-                    ).hasMatch(correo);
-                    if (!valido) return 'Escribe un correo válido';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _telefonoCtrl,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Teléfono',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                    hintText: '+56 9 1234 5678',
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Correo electrónico',
+                      prefixIcon: Icon(Icons.mail_outline),
+                    ),
+                    validator: (v) {
+                      final correo = v?.trim() ?? '';
+                      final valido = RegExp(
+                        r'^[\w\.\-]+@[\w\-]+\.[\w\.\-]+$',
+                      ).hasMatch(correo);
+                      if (!valido) return 'Escribe un correo válido';
+                      return null;
+                    },
                   ),
-                  validator: (v) {
-                    final tel = (v ?? '').replaceAll(RegExp(r'\D'), '');
-                    if (tel.length < 8) return 'Escribe un teléfono válido';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _enviando ? null : _enviarReserva,
-                  child: _enviando
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            color: YampiColors.blanco,
-                            strokeWidth: 2.5,
-                          ),
-                        )
-                      : const Text('RESERVAR'),
-                ),
-                const SizedBox(height: 14),
-                const Text(
-                  'Tu hora queda pendiente hasta que el barbero la confirme.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: YampiColors.grisTexto,
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _telefonoCtrl,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      labelText: 'Teléfono',
+                      prefixIcon: Icon(Icons.phone_outlined),
+                      hintText: '+56 9 1234 5678',
+                    ),
+                    validator: (v) {
+                      final tel = (v ?? '').replaceAll(RegExp(r'\D'), '');
+                      if (tel.length < 8) {
+                        return 'Escribe un teléfono válido';
+                      }
+                      return null;
+                    },
                   ),
-                ),
-              ],
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: _enviando ? null : _enviarReserva,
+                    child: _enviando
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              color: YampiColors.blanco,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : const Text('RESERVAR'),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'Tu hora queda pendiente hasta que el barbero la confirme.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: YampiColors.grisTexto,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -204,11 +232,13 @@ class _ResumenReserva extends StatelessWidget {
   final Servicio servicio;
   final String fecha;
   final String hora;
+  final String precioFormateado;
 
   const _ResumenReserva({
     required this.servicio,
     required this.fecha,
     required this.hora,
+    required this.precioFormateado,
   });
 
   @override
@@ -241,13 +271,8 @@ class _ResumenReserva extends StatelessWidget {
                   ),
                 ),
               ),
-                            Text(
-                NumberFormat.currency(
-                  locale: 'es_CL',
-                  symbol: '\$',
-                  decimalDigits: 0,
-                ).format(servicio.precio),
-
+              Text(
+                precioFormateado,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -298,3 +323,4 @@ class _ResumenReserva extends StatelessWidget {
     );
   }
 }
+

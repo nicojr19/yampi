@@ -3,8 +3,8 @@ import 'package:intl/intl.dart';
 import '../../models/servicio.dart';
 import '../../services/firestore_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/fondo_yampi.dart';
 import 'seleccionar_hora_view.dart';
-
 
 /// Primer paso del cliente: elegir qué se va a cortar.
 ///
@@ -24,75 +24,78 @@ class SeleccionarServicioView extends StatelessWidget {
     );
 
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(title: const Text('Elige tu servicio')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
-          child: StreamBuilder<List<Servicio>>(
-            stream: firestore.servicios(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    color: YampiColors.dorado,
-                  ),
-                );
-              }
+      body: FondoYampi(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: StreamBuilder<List<Servicio>>(
+              stream: firestore.servicios(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: YampiColors.dorado,
+                    ),
+                  );
+                }
 
-              if (snapshot.hasError) {
-                return _Mensaje(
-                  icono: Icons.error_outline,
-                  titulo: 'No pudimos cargar los servicios',
-                  detalle: 'Revisa tu conexión e inténtalo de nuevo.',
-                );
-              }
+                if (snapshot.hasError) {
+                  return const _Mensaje(
+                    icono: Icons.error_outline,
+                    titulo: 'No pudimos cargar los servicios',
+                    detalle: 'Revisa tu conexión e inténtalo de nuevo.',
+                  );
+                }
 
-              final servicios = snapshot.data ?? [];
+                final servicios = snapshot.data ?? [];
 
-              if (servicios.isEmpty) {
-                return _Mensaje(
-                  icono: Icons.content_cut,
-                  titulo: 'Sin servicios disponibles',
-                  detalle: 'El barbero todavía no cargó sus precios.',
-                );
-              }
+                if (servicios.isEmpty) {
+                  return const _Mensaje(
+                    icono: Icons.content_cut,
+                    titulo: 'Sin servicios disponibles',
+                    detalle: 'El barbero todavía no cargó sus precios.',
+                  );
+                }
 
-              return ListView.separated(
-                padding: const EdgeInsets.all(20),
-                itemCount: servicios.length + 1,
-                separatorBuilder: (_, __) => const SizedBox(height: 14),
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return const Padding(
-                      padding: EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        '¿Qué te vas a hacer?',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                          color: YampiColors.negroSuave,
-                        ),
-                      ),
-                    );
-                  }
-
-                  final servicio = servicios[index - 1];
-                  return _TarjetaServicio(
-                    servicio: servicio,
-                    precioFormateado: pesos.format(servicio.precio),
-                                        onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              SeleccionarHoraView(servicio: servicio),
+                return ListView.separated(
+                  padding: const EdgeInsets.all(20),
+                  itemCount: servicios.length + 1,
+                  separatorBuilder: (_, __) => const SizedBox(height: 14),
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return const Padding(
+                        padding: EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          '¿Qué te vas a hacer?',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: YampiColors.negroSuave,
+                          ),
                         ),
                       );
-                    },
-                  );
-                },
-              );
-            },
+                    }
+
+                    final servicio = servicios[index - 1];
+                    return _TarjetaServicio(
+                      servicio: servicio,
+                      precioFormateado: pesos.format(servicio.precio),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                SeleccionarHoraView(servicio: servicio),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -225,3 +228,4 @@ class _Mensaje extends StatelessWidget {
     );
   }
 }
+

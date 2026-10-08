@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/horario.dart';
 import '../../services/firestore_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/fondo_yampi.dart';
 
 /// El barbero ajusta sus horas de atención: apertura, cierre y si el día
 /// queda habilitado o no. Los cambios se guardan en Firestore y el
@@ -59,47 +60,51 @@ class _EditarHorariosViewState extends State<EditarHorariosView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(title: const Text('Mis horarios')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
-          child: _cargando
-              ? const Center(
-                  child: CircularProgressIndicator(
-                    color: YampiColors.dorado,
-                  ),
-                )
-              : ListView(
-                  padding: const EdgeInsets.all(20),
-                  children: [
-                    const Text(
-                      'Días de atención',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: YampiColors.negroSuave,
-                      ),
+      body: FondoYampi(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: _cargando
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: YampiColors.dorado,
                     ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Cambia las horas y el calendario de los clientes se ajusta solo.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: YampiColors.grisTexto,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ..._horarios.map(
-                      (h) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: _TarjetaHorario(
-                          horario: h,
-                          onEditar: () => _editar(h),
+                  )
+                : ListView(
+                    padding: const EdgeInsets.all(20),
+                    children: [
+                      const Text(
+                        'Días de atención',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: YampiColors.negroSuave,
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Cambia las horas y el calendario de los clientes '
+                        'se ajusta solo.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: YampiColors.grisTexto,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ..._horarios.map(
+                        (h) => Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: _TarjetaHorario(
+                            horario: h,
+                            onEditar: () => _editar(h),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );
@@ -201,13 +206,13 @@ class _DialogoHorarioState extends State<_DialogoHorario> {
     );
     if (elegida == null) return;
 
-    final texto =
-        '${elegida.hour.toString().padLeft(2, '0')}:${elegida.minute.toString().padLeft(2, '0')}';
+    final hh = elegida.hour.toString().padLeft(2, '0');
+    final mm = elegida.minute.toString().padLeft(2, '0');
     setState(() {
       if (esInicio) {
-        _inicio = texto;
+        _inicio = '$hh:$mm';
       } else {
-        _fin = texto;
+        _fin = '$hh:$mm';
       }
     });
   }
@@ -275,3 +280,4 @@ class _DialogoHorarioState extends State<_DialogoHorario> {
     );
   }
 }
+

@@ -1,22 +1,14 @@
 /// Representa un bloque de atención de la barbería.
 ///
 /// Solo existen dos documentos en la colección `horarios`: sábado y domingo.
-/// Los lunes a viernes simplemente no tienen horario cargado, y por eso el
-/// calendario los bloquea — la regla vive en los datos, no en el código.
 ///
 /// `diaSemana` sigue la numeración de Dart: 0 = domingo, 1 = lunes, ...
 /// 6 = sábado.
 class Horario {
   final String id;
   final int diaSemana;
-
-  /// Hora de apertura en formato "HH:mm", por ejemplo "10:00".
   final String horaInicio;
-
-  /// Hora de cierre en formato "HH:mm", por ejemplo "20:00".
   final String horaFin;
-
-  /// Si está en false, ese día deja de ofrecerse aunque siga cargado.
   final bool habilitado;
 
   const Horario({
@@ -30,10 +22,10 @@ class Horario {
   factory Horario.fromFirestore(String id, Map<String, dynamic> data) {
     return Horario(
       id: id,
-      diaSemana: (data['diaSemana'] ?? 0).toInt(),
-      horaInicio: data['horaInicio'] ?? '10:00',
-      horaFin: data['horaFin'] ?? '23:00',
-      habilitado: data['habilitado'] ?? true,
+      diaSemana: _aInt(data['diaSemana']),
+      horaInicio: _aTexto(data['horaInicio'], '10:00'),
+      horaFin: _aTexto(data['horaFin'], '23:00'),
+      habilitado: _aBool(data['habilitado']),
     );
   }
 
@@ -46,7 +38,6 @@ class Horario {
     };
   }
 
-  /// Nombre legible del día, para mostrar en pantalla.
   String get nombreDia {
     const dias = [
       'Domingo',
@@ -60,11 +51,7 @@ class Horario {
     return dias[diaSemana % 7];
   }
 
-  /// Hora de inicio convertida a minutos desde medianoche.
-  /// "10:30" se convierte en 630. Sirve para generar los slots.
   int get inicioEnMinutos => _aMinutos(horaInicio);
-
-  /// Hora de cierre convertida a minutos desde medianoche.
   int get finEnMinutos => _aMinutos(horaFin);
 
   static int _aMinutos(String hhmm) {
@@ -74,4 +61,28 @@ class Horario {
     final minutos = int.tryParse(partes[1]) ?? 0;
     return horas * 60 + minutos;
   }
+
+  // --- Conversores tolerantes ---
+  // Firestore puede devolver un número como int, double o texto.
+  // Estos helpers aceptan los tres casos sin lanzar excepción.
+
+  static int _aInt(dynamic valor) {
+    if (valor is int) return valor;
+    if (valor is double) return valor.toInt();
+    if (valor is String) return int.tryParse(valor) ?? 0;
+    return 0;
+  }
+
+  static String _aTexto(dynamic valor, String porDefecto) {
+    if (valor is String && valor.isNotEmpty) return valor;
+    return porDefecto;
+  }
+
+  static bool _aBool(dynamic valor) {
+    if (valor is bool) return valor;
+    if (valor is String) return valor.toLowerCase() == 'true';
+    if (valor is int) return valor != 0;
+    return true;
+  }
 }
+

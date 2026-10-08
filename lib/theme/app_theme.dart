@@ -1,103 +1,125 @@
 import 'package:flutter/material.dart';
 
-/// Paleta de Yampi — dorado brillante sobre blanco, elegante.
+/// Paleta de Yampi adaptada para un entorno oscuro y profesional.
 class YampiColors {
-  /// Dorado principal — el brillo de la marca.
-  static const Color dorado = Color(0xFFD4AF37);
+  // --- Fondos ---
+  static const Color fondo = Color(0xFF0F0F0F);
+  static const Color superficie = Color(0xFF1E1E1E);
+  static const Color superficieClara = Color(0xFF2A2A2A);
 
-  /// Dorado claro — para degradados y reflejos.
-  static const Color doradoClaro = Color(0xFFF4E4A6);
+  // --- Acento metálico / elegante ---
+  static const Color dorado = Color(0xFF8E95A0); // Gris metálico más claro para resaltar en oscuro
+  static const Color doradoOscuro = Color(0xFF4A4F57);
+  static const Color doradoClaro = Color(0xFF333842); // Bordes sutiles oscuros
 
-  /// Dorado oscuro — para textos sobre blanco y bordes.
-  static const Color doradoOscuro = Color(0xFF9C7C1F);
-
-  /// Blanco puro — fondo principal.
-  static const Color blanco = Color(0xFFFFFFFF);
-
-  /// Blanco hueso — fondo secundario, más suave que el puro.
-  static const Color blancoHueso = Color(0xFFFAF8F3);
-
-  /// Negro suave — texto principal, nunca negro puro.
-  static const Color negroSuave = Color(0xFF1A1A1A);
-
-  /// Gris — texto secundario.
-  static const Color grisTexto = Color(0xFF6B6B6B);
-
-  /// Verde — reserva confirmada.
-  static const Color confirmado = Color(0xFF2E7D32);
-
-  /// Rojo — reserva rechazada.
-  static const Color rechazado = Color(0xFFC62828);
-
-  /// Ámbar — reserva pendiente de aprobación.
-  static const Color pendiente = Color(0xFFF9A825);
-
-  /// Degradado dorado — para el logo y los botones principales.
   static const LinearGradient degradadoDorado = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [doradoClaro, dorado, doradoOscuro],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF6E747D), Color(0xFF3A3E45)],
   );
+
+  // --- Texto ---
+  static const Color negroSuave = Color(0xFFFFFFFF); // Blanco principal en modo oscuro
+  static const Color grisTexto = Color(0xFF9EA4AE); // Texto secundario legible
+
+  // --- Neutros ---
+  static const Color blanco = Color(0xFFFFFFFF);
+  static const Color blancoHueso = Color(0xFF1E1E1E);
+
+  // --- Estados ---
+  static const Color confirmado = Color(0xFF2E8B57);
+  static const Color rechazado = Color(0xFFC0392B);
+  static const Color pendiente = Color(0xFFB8860B);
 }
 
 class AppTheme {
-  static ThemeData get light {
-    final base = ThemeData.light(useMaterial3: true);
-
-    return base.copyWith(
-      scaffoldBackgroundColor: YampiColors.blanco,
-      colorScheme: const ColorScheme.light(
-        primary: YampiColors.dorado,
-        onPrimary: YampiColors.blanco,
-        secondary: YampiColors.doradoOscuro,
-        onSecondary: YampiColors.blanco,
-        surface: YampiColors.blanco,
+  static ThemeData get dark {
+    final base = ThemeData(
+      brightness: Brightness.dark,
+      useMaterial3: true,
+      scaffoldBackgroundColor: Colors.black,
+      colorScheme: const ColorScheme.dark(
+        primary: YampiColors.blanco,
+        onPrimary: Colors.black,
+        secondary: YampiColors.dorado,
+        onSecondary: Colors.white,
+        surface: YampiColors.superficie,
         onSurface: YampiColors.negroSuave,
         error: YampiColors.rechazado,
+        onError: YampiColors.blanco,
+      ),
+    );
+
+    return base.copyWith(
+      tabBarTheme: TabBarThemeData(
+        labelColor: YampiColors.blanco, // Texto blanco activo y en hover
+        unselectedLabelColor: YampiColors.grisTexto,
+        indicatorColor: YampiColors.dorado,
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.hovered)) {
+            return YampiColors.dorado.withValues(alpha: 0.12);
+          }
+          if (states.contains(WidgetState.pressed)) {
+            return YampiColors.dorado.withValues(alpha: 0.20);
+          }
+          return null;
+        }),
+        splashBorderRadius: BorderRadius.circular(10),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: YampiColors.blanco,
+        backgroundColor: Colors.black,
         foregroundColor: YampiColors.negroSuave,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          color: YampiColors.doradoOscuro,
-          fontSize: 22,
+          fontSize: 20,
           fontWeight: FontWeight.w600,
-          letterSpacing: 1.5,
+          letterSpacing: 1.2,
+          color: YampiColors.negroSuave,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: YampiColors.dorado,
+          backgroundColor: const Color(0xFF1E1E1E),
           foregroundColor: YampiColors.blanco,
-          minimumSize: const Size(double.infinity, 52),
+          minimumSize: const Size.fromHeight(52),
+          elevation: 4,
+          side: const BorderSide(color: Colors.white24, width: 1),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.8,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.0,
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: YampiColors.doradoOscuro,
-          side: const BorderSide(color: YampiColors.dorado, width: 1.5),
-          minimumSize: const Size(double.infinity, 52),
+          foregroundColor: YampiColors.grisTexto,
+          minimumSize: const Size.fromHeight(52),
+          backgroundColor: const Color(0xFF141414).withOpacity(0.6),
+          side: const BorderSide(color: Colors.white12, width: 1),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.0,
           ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: YampiColors.blancoHueso,
+        fillColor: YampiColors.superficieClara,
+        labelStyle: const TextStyle(color: YampiColors.grisTexto),
+        hintStyle: const TextStyle(color: YampiColors.grisTexto),
+        prefixIconColor: YampiColors.dorado,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: YampiColors.doradoClaro),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -105,14 +127,15 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: YampiColors.dorado, width: 2),
+          borderSide: const BorderSide(
+            color: Colors.white30,
+            width: 1.5,
+          ),
         ),
-        labelStyle: const TextStyle(color: YampiColors.grisTexto),
       ),
       cardTheme: CardThemeData(
-        color: YampiColors.blanco,
-        elevation: 2,
-        shadowColor: YampiColors.dorado.withValues(alpha: 0.25),
+        color: YampiColors.superficie,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: YampiColors.doradoClaro),
@@ -122,6 +145,16 @@ class AppTheme {
         color: YampiColors.doradoClaro,
         thickness: 1,
       ),
+      snackBarTheme: const SnackBarThemeData(
+        backgroundColor: YampiColors.superficieClara,
+        contentTextStyle: TextStyle(color: YampiColors.blanco),
+      ),
     );
   }
 }
+
+
+
+
+
+
