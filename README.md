@@ -1,17 +1,43 @@
-# yampi
+# Barbería Yampi
 
-A new Flutter project.
+App web de reservas para una barbería real, con panel de administración
+para el barbero y reserva online para los clientes.
 
-## Getting Started
+**Demo:** https://yampi-barberia.web.app
 
-This project is a starting point for a Flutter application.
+## Qué hace
 
-A few resources to get you started if this is your first Flutter project:
+- El cliente elige un servicio, un día y una hora disponible, y recibe
+  confirmación por correo electrónico
+- El barbero administra todo desde un panel: confirmar, rechazar,
+  cambiar hora o anular una reserva
+- Módulo de ingresos con totales por día, semana y mes, con gráfico
+  de desglose diario
+- Historial por cliente: cantidad de visitas, última visita, total
+  gastado y servicio más pedido
+- Cierre de días completos (vacaciones, feriados) y apertura de días
+  especiales con horario propio
+- Notificaciones automáticas al barbero por cada reserva nueva
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Tecnologías
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Flutter** (Dart) para la interfaz, compilada a web
+- **Firebase Firestore** como base de datos en tiempo real
+- **Supabase Edge Functions** para el envío de correos
+- **Brevo** como servicio de correo transaccional
+- **Firebase Hosting** para el despliegue
+
+## Capturas
+
+![Reserva de hora](capturas/reserva.png)
+![Panel del barbero](capturas/panel.png)
+![ingresos](capturas/ingresos.png)
+
+## Cómo correrlo localmente
+
+    flutter pub get
+    flutter run -d chrome
+
+## Estado
+
+Finalizada, en uso por una barbería real.
